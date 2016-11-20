@@ -4,34 +4,34 @@ package interop.scodec.bits
 import scala.reflect.{ClassTag, classTag}
 import scodec.bits.ByteVector
 
-final class ByteVectorChunk private (bv: ByteVector)
+final class ByteVectorChunk private (val toByteVector: ByteVector)
     extends MonomorphicChunk[Byte]
 {
   def apply(i: Int): Byte =
-    bv(i)
+    toByteVector(i)
 
   def copyToArray[B >: Byte](xs: Array[B], start: Int): Unit =
     xs match {
       case byteArray: Array[Byte] =>
-        bv.copyToArray(byteArray, start)
+        toByteVector.copyToArray(byteArray, start)
       case _ =>
-        bv.toArray.iterator.copyToArray(xs, start)
+        toByteVector.toArray.iterator.copyToArray(xs, start)
     }
 
   def drop(n: Int): Chunk[Byte] =
-    ByteVectorChunk(bv.drop(n))
+    ByteVectorChunk(toByteVector.drop(n))
 
   def filter(f: Byte => Boolean): Chunk[Byte] = {
     var i = 0
-    val bound = bv.size
+    val bound = toByteVector.size
 
     val values2 = new Array[Byte](size)
     var size2 = 0
 
     while (i < bound) {
-      val b = bv(i)
+      val b = toByteVector(i)
       if (f(b)) {
-        values2(size2) = bv(i)
+        values2(size2) = toByteVector(i)
         size2 += 1
       }
 
@@ -42,19 +42,30 @@ final class ByteVectorChunk private (bv: ByteVector)
   }
 
   def foldLeft[B](z: B)(f: (B, Byte) => B): B =
-    bv.foldLeft(z)(f)
+    toByteVector.foldLeft(z)(f)
 
   def foldRight[B](z: B)(f: (Byte, B) => B): B =
-    bv.foldRight(z)(f)
+    toByteVector.foldRight(z)(f)
 
   def size: Int =
-    bv.size.toInt // bad truncation
+    toByteVector.size.toInt // bad truncation
 
   def take(n: Int): Chunk[Byte] =
-    ByteVectorChunk(bv.take(n))
+    ByteVectorChunk(toByteVector.take(n))
 
   protected val tag: ClassTag[_] =
     classTag[Byte]
+
+  override def concatAll[B >: Byte](chunks: Seq[Chunk[B]]): Chunk[B] = {
+    val conformed = chunks collect { case toByteVectorc: ByteVectorChunk => toByteVectorc }
+    if (chunks.isEmpty) {
+      this
+    } else if ((chunks lengthCompare conformed.size) == 0) {
+      ByteVectorChunk(conformed.foldLeft(toByteVector)(_ ++ _.toByteVector))
+    } else {
+      super.concatAll(chunks)
+    }
+  }
 }
 
 object ByteVectorChunk {

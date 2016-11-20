@@ -107,7 +107,7 @@ class ByteVectorChunkSpec
       c.toArray.toVector should be (c.toVector)
     }
 
-    "concat" in forAll { cs: List[ByteVectorChunk] =>
+    "concat ByteVectorChunks" in forAll { cs: List[ByteVectorChunk] =>
       val result = Chunk.concat(cs)
       result.toVector shouldBe cs.foldLeft(Vector.empty[Byte])(_ ++ _.toVector)
       if (!result.isEmpty) result shouldBe a[ByteVectorChunk]

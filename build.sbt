@@ -28,7 +28,9 @@ addCompilerPlugin("org.spire-math" % "kind-projector" % "0.7.1" cross CrossVersi
 resolvers += "Sonatype Public" at "https://oss.sonatype.org/content/groups/public/"
 libraryDependencies ++= Seq(
   "co.fs2" %% "fs2-core" % "1.0.0-SNAPSHOT",
-  "org.scodec" %% "scodec-bits" % "1.1.2"
+  "org.scodec" %% "scodec-bits" % "1.1.2",
+  "org.scalatest" %% "scalatest" % "3.0.0" % "test",
+  "org.scalacheck" %% "scalacheck" % "1.13.4" % "test"
 )
 
 scmInfo := Some(ScmInfo(url("https://github.com/rossabaker/fs2-scodec-bits"), "git@github.com:rossabaker/fs2-scodec-bits.git"))
@@ -46,8 +48,6 @@ doctestWithDependencies := false
 
 parallelExecution in Test := false
 logBuffered in Test := false
-testOptions in Test += Tests.Argument("-verbosity", "2")
-testOptions in Test += Tests.Argument("-minSuccessfulTests", "500")
 publishArtifact in Test := true
 
 scalacOptions in (Compile, doc) ++= Seq(

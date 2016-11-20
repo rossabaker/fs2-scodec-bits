@@ -54,8 +54,7 @@ final class ByteVectorChunk private (bv: ByteVector)
     ByteVectorChunk(bv.take(n))
 
   protected val tag: ClassTag[_] =
-    classTag[ByteVector]
-
+    classTag[Byte]
 }
 
 object ByteVectorChunk {
